@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf4">
+  <title>Le secret de bébé — Gender Reveal</title>
+  <meta name="description" content="Une douce révélation nous attend… bleu ou rose ?">
+  <style>
+    :root {
+      --ivory: #fffaf4;
+      --paper: #fffdf9;
+      --ink: #513f43;
+      --muted: #8d777b;
+      --blush: #eebac4;
+      --rose: #cf7289;
+      --rose-deep: #a94f67;
+      --blue: #a9d5e7;
+      --blue-deep: #5f9fbc;
+      --lilac: #c2aed2;
+      --gold: #c5a46a;
+      --shadow: 0 26px 80px rgba(111, 73, 82, .14);
+      --serif: "Bodoni 72", Didot, "Baskerville", "Times New Roman", serif;
+      --body: "Avenir Next", Avenir, "Century Gothic", sans-serif;
+      --arabic: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(169,213,231,.26), transparent 30rem),
+        radial-gradient(circle at 86% 18%, rgba(238,186,196,.3), transparent 28rem),
+        var(--ivory);
+      font-family: var(--body);
+      font-weight: 400;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .2;
+      z-index: 20;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--rose-deep); outline-offset: 4px; }
+    ::selection { background: #f3ccd4; color: #6f3444; }
+
+    #confetti { position: fixed; inset: 0; z-index: 60; pointer-events: none; width: 100%; height: 100%; }
+    #light-wash {
+      position: fixed; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
+      background: radial-gradient(circle, rgba(255,255,255,.98), rgba(255,220,229,.8) 38%, transparent 72%);
+    }
+    #light-wash.flash { animation: lightFlash 1.8s ease-out; }
+    @keyframes lightFlash { 0%{opacity:0} 28%{opacity:1} 100%{opacity:0} }
+
+    .opening {
+      position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+      background: #fffdf9; transition: visibility 0s 2.2s;
+    }
+    .opening.complete { visibility: hidden; }
+    .curtain {
+      position: absolute; inset-block: 0; width: 51%; z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.25), rgba(217,202,185,.14) 13%, rgba(255,255,255,.65) 28%, rgba(214,199,184,.16) 43%, rgba(255,255,255,.7) 63%, rgba(209,192,178,.12) 82%, rgba(255,255,255,.55)),
+        #fdfaf4;
+      box-shadow: inset -16px 0 35px rgba(138,112,91,.08);
+      transition: transform 2.1s cubic-bezier(.77,0,.18,1);
+    }
+    .curtain::before { content:""; position:absolute; inset:0; background: repeating-linear-gradient(90deg, transparent 0 7%, rgba(111,80,68,.035) 8%, transparent 16%); }
+    .curtain-left { left: 0; border-right: 1px solid rgba(197,164,106,.28); transform-origin: left; }
+    .curtain-right { right: 0; border-left: 1px solid rgba(197,164,106,.28); transform-origin: right; }
+    .opening.opened .curtain-left { transform: translateX(-101%) skewX(-2deg); }
+    .opening.opened .curtain-right { transform: translateX(101%) skewX(2deg); }
+    .opening-copy { position: relative; z-index: 3; text-align: center; padding: 2rem; width: min(92vw, 660px); transition: opacity .55s ease, transform .7s ease; }
+    .opening.opened .opening-copy { opacity: 0; transform: scale(.96); pointer-events: none; }
+    .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: .26em; font-size: .68rem; font-weight: 600; }
+    .tiny-heart { width: 60px; height: 60px; display: grid; place-items: center; margin: 1.25rem auto .6rem; border: 1px solid rgba(197,164,106,.5); border-radius: 50%; color: var(--rose); font-size: 2rem; }
+    .opening h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(2.8rem, 8vw, 5.6rem); letter-spacing: -.04em; line-height: .94; }
+    .opening p { color: var(--muted); margin: 1.6rem 0 2rem; font-family: var(--serif); font-style: italic; font-size: 1.1rem; }
+    .opening small { display:block; margin-top: 1rem; color: #aa9698; font-size: .68rem; letter-spacing: .06em; }
+
+    /* Styles pour l'arabe */
+    .arabic-text {
+      font-family: var(--arabic);
+      direction: rtl;
+      unicode-bidi: embed;
+      line-height: 1.8;
+    }
+    .arabic-quote {
+      font-family: var(--arabic);
+      direction: rtl;
+      font-size: 1.4rem;
+      color: var(--rose-deep);
+      margin: 0.5rem 0;
+      font-weight: 500;
+    }
+    .arabic-sub {
+      font-family: var(--arabic);
+      direction: rtl;
+      font-size: 1rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+      font-style: normal;
+    }
+
+    .primary-button {
+      border: 0; border-radius: 999px; padding: 1rem 1.65rem; cursor: pointer;
+      background: var(--ink); color: white; text-transform: uppercase; letter-spacing: .12em; font-size: .72rem; font-weight: 600;
+      box-shadow: 0 12px 30px rgba(81,63,67,.23); transition: transform .25s, box-shadow .25s, background .25s;
+    }
+    .primary-button:hover { transform: translateY(-3px); box-shadow: 0 17px 34px rgba(81,63,67,.28); background: #6a4b54; }
+    .primary-button span { color: #f2d99d; margin-left: .45rem; }
+    .sound-toggle { position: fixed; right: 1rem; top: 1rem; z-index: 80; width: 44px; height: 44px; border: 1px solid rgba(197,164,106,.35); background: rgba(255,253,249,.8); backdrop-filter: blur(12px); border-radius: 50%; cursor: pointer; box-shadow: 0 8px 24px rgba(93,71,77,.1); }
+    .sound-toggle.muted::after { content:""; position:absolute; width: 24px; height:1px; background:var(--rose-deep); transform:rotate(-45deg); left:9px; top:21px; }
+    #experience { opacity: 0; transition: opacity 1.2s ease .7s; }
+    #experience.visible { opacity: 1; }
+    .toast { position: fixed; left:50%; bottom: 1.25rem; transform:translate(-50%, 20px); z-index:90; background:#513f43; color:white; border-radius:999px; padding:.8rem 1.2rem; font-size:.76rem; opacity:0; pointer-events:none; transition:.3s; text-align:center; }
+    .toast.show { opacity:1; transform:translate(-50%, 0); }
+
+    .hero { min-height: 100svh; display:grid; place-items:center; position:relative; overflow:hidden; padding:6rem 1.5rem 4rem; text-align:center; }
+    .hero::before, .hero::after { content:""; position:absolute; border:1px solid rgba(197,164,106,.26); border-radius:50%; width:min(72vw,680px); aspect-ratio:1; }
+    .hero::after { width:min(55vw,510px); border-style:dashed; animation:orbit 42s linear infinite; }
+    @keyframes orbit { to{transform:rotate(360deg)} }
+    .float-word { position:absolute; z-index:0; font-family:var(--serif); font-size:clamp(5rem,17vw,13rem); opacity:.13; line-height:1; }
+    .float-word.boy { color:var(--blue-deep); left:-.05em; top:23%; transform:rotate(-90deg) translateX(-20%); transform-origin:left top; }
+    .float-word.girl { color:var(--rose-deep); right:-.05em; bottom:15%; transform:rotate(90deg) translateX(20%); transform-origin:right bottom; }
+    .hero-inner { position:relative; z-index:2; max-width:780px; }
+    .chapter { display:inline-flex; align-items:center; gap:.75rem; color:var(--gold); font-size:.68rem; text-transform:uppercase; letter-spacing:.24em; }
+    .chapter::before,.chapter::after { content:""; width:34px; height:1px; background:currentColor; }
+    .hero h2 { font-family:var(--serif); font-weight:400; font-size:clamp(3.6rem,11vw,8.4rem); line-height:.85; letter-spacing:-.055em; margin:1.6rem 0 1.2rem; }
+    .hero h2 .blue { color:var(--blue-deep); font-style:italic; }
+    .hero h2 .pink { color:var(--rose-deep); font-style:italic; }
+    .hero-lead { max-width:540px; margin:0 auto; color:var(--muted); line-height:1.8; font-family:var(--serif); font-size:clamp(1.05rem,2.6vw,1.35rem); }
+    .pulse-heart { position:relative; width:104px; height:104px; margin:2.5rem auto 1.3rem; display:grid; place-items:center; }
+    .pulse-heart::before,.pulse-heart::after { content:""; position:absolute; inset:0; border-radius:50%; border:1px solid rgba(197,164,106,.35); animation:pulseRing 2.2s infinite; }
+    .pulse-heart::after { animation-delay:1.1s; }
+    .heart-glyph { font-size:3.5rem; animation:heartBeat 1.25s infinite, heartColor 5s infinite alternate; filter:drop-shadow(0 8px 18px rgba(207,114,137,.18)); }
+    @keyframes pulseRing { from{opacity:.8;transform:scale(.6)} to{opacity:0;transform:scale(1.35)} }
+    @keyframes heartBeat { 0%,40%,80%,100%{transform:scale(1)} 20%,60%{transform:scale(1.12)} }
+    @keyframes heartColor { 0%{color:#78b8d5} 48%{color:#b196c7} 100%{color:#dc8097} }
+    .secret-note { color:#9d898d; font-size:.73rem; letter-spacing:.16em; text-transform:uppercase; }
+    .scroll-cue { position:absolute; bottom:1.4rem; display:flex; flex-direction:column; align-items:center; gap:.55rem; color:#9f898c; font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; }
+    .scroll-cue i { display:block; width:1px; height:38px; background:linear-gradient(var(--gold),transparent); animation:scrollLine 1.7s infinite; }
+    @keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+
+    .story { position:relative; padding:8rem 1.25rem 10rem; background:rgba(255,253,249,.72); overflow:hidden; }
+    .story::before { content:""; position:absolute; inset:0; background:linear-gradient(115deg, transparent 49.8%, rgba(197,164,106,.14) 50%, transparent 50.2%); }
+    .story-heading { max-width:720px; margin:0 auto 5.5rem; text-align:center; position:relative; }
+    .story-heading h2 { font-family:var(--serif); font-weight:400; font-size:clamp(2.7rem,7vw,5.4rem); margin:.7rem 0 0; letter-spacing:-.04em; }
+    .steps { max-width:1000px; margin:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:1.3rem; position:relative; }
+    .step { min-height:310px; border:1px solid rgba(197,164,106,.28); background:rgba(255,255,255,.63); padding:2.2rem 1.7rem; position:relative; box-shadow:0 12px 40px rgba(91,67,73,.07); opacity:.45; transform:translateY(22px); transition:opacity .8s, transform .8s, background .8s; }
+    .step.active { opacity:1; transform:translateY(0); background:#fff; }
+    .step-number { color:var(--gold); font-family:var(--serif); font-size:1.1rem; }
+    .step-icon { font-size:2.2rem; margin:3.2rem 0 1rem; display:block; filter:saturate(.75); }
+    .step h3 { font-family:var(--serif); font-size:1.8rem; font-weight:400; margin:0 0 .7rem; }
+    .step p { color:var(--muted); line-height:1.7; margin:0; font-size:.9rem; }
+    .story-timer { text-align:center; margin-top:5rem; }
+    .story-timer p { font-family:var(--serif); font-style:italic; color:var(--muted); }
+    .numbers { display:flex; justify-content:center; align-items:center; gap:1.1rem; margin-top:1rem; }
+    .numbers span { width:56px; height:56px; display:grid; place-items:center; border-radius:50%; border:1px solid rgba(197,164,106,.42); font-family:var(--serif); font-size:1.5rem; color:#b59b70; }
+    .numbers span.on { color:white; background:var(--ink); border-color:var(--ink); transform:scale(1.12); transition:.4s; }
+
+    .lock-zone { min-height:100svh; display:grid; place-items:center; padding:6rem 1.25rem; position:relative; overflow:hidden; }
+    .lock-zone::before,.lock-zone::after { content:""; position:absolute; width:44vw; aspect-ratio:1; border-radius:50%; filter:blur(65px); opacity:.28; }
+    .lock-zone::before { left:-20vw; background:var(--blue); }
+    .lock-zone::after { right:-20vw; background:var(--blush); }
+    .lock-card { width:min(100%,660px); text-align:center; padding:clamp(2.4rem,7vw,5.2rem); background:rgba(255,253,249,.86); border:1px solid rgba(197,164,106,.35); box-shadow:var(--shadow); position:relative; z-index:2; }
+    .lock-card::before { content:""; position:absolute; inset:10px; border:1px solid rgba(197,164,106,.2); pointer-events:none; }
+    .lock-icon { width:76px; height:76px; margin:auto; border-radius:50%; display:grid; place-items:center; background:#f8eee8; font-size:1.9rem; }
+    .lock-card h2 { font-family:var(--serif); font-size:clamp(2.6rem,7vw,4.9rem); font-weight:400; letter-spacing:-.04em; line-height:.95; margin:1.5rem 0; }
+    .lock-card p { color:var(--muted); line-height:1.8; margin:0 auto 2.2rem; max-width:400px; }
+    .reveal-button { background:linear-gradient(110deg,#9dbed1,#cf9fb2); padding:1.15rem 2rem; }
+    .reveal-button:hover { background:linear-gradient(110deg,#79aec9,#ce829d); }
+    .privacy-note { display:block; margin-top:1.3rem; color:#aa9498; font-size:.66rem; letter-spacing:.08em; }
+
+    .reveal { min-height:100svh; display:none; place-items:center; position:relative; padding:7rem 1.25rem; overflow:hidden; background:radial-gradient(circle at center,#fffdfb 0,#fbe9ed 56%,#ecc3cd 100%); }
+    .reveal.live { display:grid; animation:revealIn 1.3s ease both; }
+    @keyframes revealIn { from{opacity:0} to{opacity:1} }
+    .reveal::before { content:""; position:absolute; inset:-30%; background:conic-gradient(from 20deg,transparent,#fff8 8%,transparent 17%,#fff6 34%,transparent 42%,#fff8 69%,transparent 78%); animation:slowSpin 28s linear infinite; }
+    @keyframes slowSpin { to{transform:rotate(360deg)} }
+    .orbit-dot { position:absolute; width:36px; height:36px; border-radius:50%; opacity:.55; top:50%; left:50%; transform-origin:0 0; animation:dotOrbit 3.4s cubic-bezier(.65,0,.35,1) both; }
+    .orbit-dot.blue { background:var(--blue); box-shadow:0 0 30px var(--blue); }
+    .orbit-dot.pink { background:var(--blush); box-shadow:0 0 30px var(--blush); animation-direction:reverse; }
+    @keyframes dotOrbit { 0%{transform:rotate(0) translateX(8vw) scale(1)} 70%{transform:rotate(720deg) translateX(34vw) scale(.65)} 100%{transform:rotate(900deg) translateX(0) scale(0)} }
+    .reveal-copy { text-align:center; position:relative; z-index:4; opacity:0; transform:scale(.86); }
+    .reveal-copy.show { animation:copyBloom 1.2s .6s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes copyBloom { to{opacity:1;transform:scale(1)} }
+    .bow { font-size:clamp(3rem,8vw,5rem); display:block; animation:bowFloat 2.5s ease-in-out infinite; }
+    @keyframes bowFloat { 50%{transform:translateY(-9px) rotate(2deg)} }
+    .reveal-kicker { display:block; color:var(--rose-deep); letter-spacing:.3em; text-transform:uppercase; font-size:.7rem; font-weight:600; margin:1.3rem 0; }
+    .reveal h2 { margin:0; font-family:var(--serif); font-weight:400; font-size:clamp(4rem,13vw,10rem); letter-spacing:-.065em; line-height:.75; color:#9f4d63; text-shadow:0 3px 0 #fff9, 0 18px 50px rgba(169,79,103,.18); }
+    .reveal h2 em { display:block; font-size:.62em; font-weight:400; margin-top:.45em; color:#c36b82; }
+    .reveal p { font-family:var(--serif); font-size:clamp(1.05rem,3vw,1.5rem); font-style:italic; max-width:580px; color:#875d67; line-height:1.6; margin:2rem auto; }
+    .floral-line { display:flex; justify-content:center; gap:1.2rem; color:#c78392; font-size:1.3rem; }
+    .continue-link { display:inline-block; margin-top:2.6rem; border:0; background:transparent; color:#8b5b66; border-bottom:1px solid #bc8994; padding:.35rem .2rem; cursor:pointer; text-transform:uppercase; letter-spacing:.16em; font-size:.66rem; }
+
+    .after { display:none; background:#fffaf6; }
+    .after.live { display:block; }
+    .keepsake { min-height:100svh; display:grid; grid-template-columns:1fr 1fr; max-width:1180px; margin:auto; padding:7rem 2rem; align-items:center; gap:clamp(3rem,8vw,8rem); }
+    .baby-art { position:relative; aspect-ratio:4/5; background:linear-gradient(160deg,#f7dce2,#fffaf4 66%); border-radius:50% 50% 44% 44%; overflow:hidden; box-shadow:var(--shadow); border:10px solid white; }
+    .baby-art::after { content:""; position:absolute; inset:20px; border:1px solid rgba(197,164,106,.32); border-radius:50% 50% 44% 44%; }
+    .baby-art svg { width:100%; height:100%; position:relative; z-index:1; }
+    .keepsake-copy .chapter { margin-bottom:1.2rem; }
+    .keepsake-copy h2 { font-family:var(--serif); font-weight:400; font-size:clamp(3rem,7vw,5.4rem); line-height:.92; letter-spacing:-.045em; margin:0 0 1.5rem; }
+    .keepsake-copy p { color:var(--muted); line-height:1.85; max-width:470px; font-family:var(--serif); font-size:1.15rem; }
+    .action-row { display:flex; flex-wrap:wrap; gap:.8rem; margin-top:2rem; }
+    .soft-button { border:1px solid rgba(169,79,103,.3); background:white; border-radius:999px; padding:.9rem 1.25rem; cursor:pointer; font-size:.75rem; letter-spacing:.06em; transition:.25s; }
+    .soft-button:hover { background:#f8e3e8; transform:translateY(-2px); }
+
+    .names { padding:8rem 1.25rem; background:#f3d8de; position:relative; overflow:hidden; text-align:center; }
+    .names::before { content:"♡"; position:absolute; color:rgba(255,255,255,.45); font-family:var(--serif); font-size:36rem; line-height:1; left:50%; top:45%; transform:translate(-50%,-50%); }
+    .names-inner { max-width:760px; margin:auto; position:relative; z-index:1; }
+    .names h2 { font-family:var(--serif); font-weight:400; font-size:clamp(2.8rem,8vw,6rem); line-height:.95; letter-spacing:-.045em; margin:1rem 0 1.3rem; }
+    .names > div > p { color:#88636b; line-height:1.7; }
+    .name-form { max-width:560px; margin:2.2rem auto 0; display:flex; background:white; border-radius:999px; padding:.4rem; box-shadow:0 15px 40px rgba(121,74,85,.14); }
+    .name-form input { flex:1; min-width:0; border:0; background:transparent; padding:.8rem 1.1rem; color:var(--ink); }
+    .name-form input::placeholder { color:#b89ba2; }
+    .name-form button { border:0; border-radius:999px; background:var(--ink); color:white; padding:.8rem 1.2rem; cursor:pointer; font-size:.7rem; text-transform:uppercase; letter-spacing:.09em; }
+    .suggestions { display:flex; justify-content:center; flex-wrap:wrap; gap:.7rem; margin:2rem auto 0; max-width:620px; }
+    .suggestion { background:rgba(255,255,255,.66); border:1px solid rgba(255,255,255,.9); border-radius:999px; padding:.65rem 1rem; font-family:var(--serif); animation:suggestionIn .5s ease both; }
+    @keyframes suggestionIn { from{opacity:0;transform:translateY(8px)} }
+    .final-note { padding:3.5rem 1.25rem; background:var(--ink); color:#f5e6e8; text-align:center; }
+    .final-note span { color:#e6b4bf; }
+    .final-note p { margin:.45rem; font-family:var(--serif); font-size:1.2rem; }
+    .final-note small { color:#c6aeb3; letter-spacing:.14em; text-transform:uppercase; font-size:.58rem; }
+
+    @media (max-width: 760px) {
+      .steps { grid-template-columns:1fr; max-width:440px; }
+      .step { min-height:230px; }
+      .step-icon { margin-top:2rem; }
+      .keepsake { grid-template-columns:1fr; padding:6rem 1.25rem; }
+      .baby-art { width:min(100%,430px); margin:auto; }
+      .keepsake-copy { text-align:center; }
+      .keepsake-copy .chapter, .action-row { justify-content:center; }
+      .keepsake-copy p { margin-inline:auto; }
+      .float-word { opacity:.09; }
+    }
+    @media (max-width: 480px) {
+      .opening-copy { padding:1.2rem; }
+      .hero h2 { font-size:3.8rem; }
+      .name-form { border-radius:20px; flex-direction:column; padding:.55rem; }
+      .name-form button { padding:1rem; }
+      .action-row { flex-direction:column; }
+      .soft-button { width:100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+    }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div id="light-wash" aria-hidden="true"></div>
+
+  <div id="opening" class="opening" role="dialog" aria-modal="true" aria-labelledby="opening-title">
+    <div class="curtain curtain-left" aria-hidden="true"></div>
+    <div class="curtain curtain-right" aria-hidden="true"></div>
+    <div class="opening-copy">
+      <span class="eyebrow">Une invitation très spéciale</span>
+      <div class="tiny-heart" aria-hidden="true">♡</div>
+      <h1 id="opening-title">Un petit secret<br>se cache ici…</h1>
+      <p>Êtes-vous prêts à découvrir la surprise&nbsp;?</p>
+      <p class="arabic-quote">هَلْ أَنْتُمْ مُسْتَعِدُّونَ لِمَعْرِفَةِ الْمُفَاجَأَة؟</p>
+      <p class="arabic-sub">(Êtes-vous prêts à découvrir la surprise ?)</p>
+      <button id="open-button" class="primary-button">Ouvrir la révélation <span>✦</span></button>
+      <small>Activez le son pour vivre toute l’expérience</small>
+    </div>
+  </div>
+
+  <button id="sound-toggle" class="sound-toggle" aria-label="Couper la musique" aria-pressed="false">♪</button>
+
+  <main id="experience" aria-hidden="true">
+    <section class="hero" aria-labelledby="suspense-title">
+      <span class="float-word boy" aria-hidden="true">BOY</span>
+      <span class="float-word girl" aria-hidden="true">GIRL</span>
+      <div class="hero-inner">
+        <span class="chapter">Le secret de bébé</span>
+        <div class="pulse-heart" aria-hidden="true"><span class="heart-glyph">♥</span></div>
+        <h2 id="suspense-title"><span class="blue">Bleu</span> ou <span class="pink">Rose</span>&nbsp;?</h2>
+        <p class="hero-lead">Un petit cœur bat déjà très fort… mais une question reste encore sans réponse.</p>
+        <p class="arabic-text" style="font-size: 1.3rem; color: var(--rose-deep); margin-top: 1rem;">قَلْبٌ صَغِيرٌ يَدُقُّ بِقُوَّةٍ... لَكِنَّ السُّؤَالَ لَا يَزَالُ بِدُونِ جَوَاب</p>
+        <p class="secret-note">Le secret sera bientôt dévoilé</p>
+      </div>
+      <div class="scroll-cue" aria-hidden="true"><span>L’histoire commence</span><i></i></div>
+    </section>
+
+    <section class="story" aria-labelledby="story-title">
+      <header class="story-heading">
+        <span class="chapter">Trois petits chapitres</span>
+        <h2 id="story-title">Avant de vous dire…</h2>
+        <p class="arabic-text" style="color: var(--muted); font-size: 1.1rem; margin-top: 0.8rem;">قَبْلَ أَنْ نُخْبِرَكُمْ...</p>
+      </header>
+      <div class="steps">
+        <article class="step" data-step="0">
+          <span class="step-number">01</span><span class="step-icon" aria-hidden="true">✦</span>
+          <h3>Un petit miracle</h3><p>Quelque chose de merveilleux est déjà en chemin…</p>
+          <p class="arabic-text" style="font-size: 0.9rem; color: var(--rose); margin-top: 0.5rem;">مُعْجِزَةٌ صَغِيرَة</p>
+        </article>
+        <article class="step" data-step="1">
+          <span class="step-number">02</span><span class="step-icon" aria-hidden="true">♡</span>
+          <h3>Deux cœurs impatients</h3><p>Papa et Maman comptent les jours avec tant de tendresse.</p>
+          <p class="arabic-text" style="font-size: 0.9rem; color: var(--rose); margin-top: 0.5rem;">قَلْبَانِ يَنْتَظِرَانِ بِشَوْق</p>
+        </article>
+        <article class="step" data-step="2">
+          <span class="step-number">03</span><span class="step-icon" aria-hidden="true">☾</span>
+          <h3>Une nouvelle aventure</h3><p>Bientôt, notre histoire accueillera son plus doux chapitre.</p>
+          <p class="arabic-text" style="font-size: 0.9rem; color: var(--rose); margin-top: 0.5rem;">مُغَامَرَةٌ جَدِيدَة</p>
+        </article>
+      </div>
+      <div class="story-timer" aria-live="polite">
+        <p>On se rapproche tout doucement…</p>
+        <p class="arabic-text" style="color: var(--muted); font-size: 1rem;">نَقْتَرِبُ بِهُدُوءٍ...</p>
+        <div class="numbers"><span data-count="3">3</span><span data-count="2">2</span><span data-count="1">1</span></div>
+      </div>
+    </section>
+
+    <section class="lock-zone" id="secret" aria-labelledby="lock-title">
+      <div class="lock-card">
+        <div class="lock-icon" aria-hidden="true">♡</div>
+        <span class="chapter">Confidentiel</span>
+        <h2 id="lock-title">Le secret de bébé</h2>
+        <p class="arabic-text" style="font-size: 1.2rem; color: var(--rose-deep); margin-bottom: 0.5rem;">سِرُّ الطِّفْل</p>
+        <p>Vous êtes arrivés jusqu’ici… Voulez-vous vraiment découvrir notre merveilleuse surprise&nbsp;?</p>
+        <p class="arabic-text" style="font-size: 1rem; color: var(--muted); margin-top: 0.5rem;">هَلْ تُرِيدُونَ حَقًّا أَنْ تَكْتَشِفُوا مُفَاجَأَتَنَا الرَّائِعَة؟</p>
+        <button id="reveal-button" class="primary-button reveal-button">Révéler le secret <span>✦</span></button>
+        <small class="privacy-note">Attention — beaucoup de bonheur juste après ce clic</small>
+      </div>
+    </section>
+
+    <section class="reveal" id="reveal" aria-labelledby="reveal-title">
+      <span class="orbit-dot blue" aria-hidden="true"></span><span class="orbit-dot blue" aria-hidden="true"></span>
+      <span class="orbit-dot pink" aria-hidden="true"></span><span class="orbit-dot pink" aria-hidden="true"></span>
+      <div class="reveal-copy">
+        <span class="bow" aria-hidden="true">🎀</span>
+        <span class="reveal-kicker">Notre plus beau secret</span>
+        <h2 id="reveal-title">C’est une<em>petite fille&nbsp;!</em></h2>
+        <p class="arabic-text" style="font-size: 2rem; color: var(--rose-deep); margin: 1rem 0; font-weight: 600;">إِنَّهَا بِنْتٌ صَغِيرَة!</p>
+        <p>Une petite princesse va bientôt rejoindre notre histoire…</p>
+        <p class="arabic-text" style="font-size: 1.1rem; color: #875d67; margin-top: 0.5rem;">أَمِيرَةٌ صَغِيرَة سَتَنْضَمُّ قَرِيبًا إِلَى حِكَايَتِنَا...</p>
+        <div class="floral-line" aria-hidden="true"><span>✦</span><span>❀</span><span>♡</span><span>❀</span><span>✦</span></div>
+        <button id="continue-button" class="continue-link">Continuer ce joli moment</button>
+      </div>
+    </section>
+
+    <div class="after" id="after-reveal">
+      <section class="keepsake" aria-labelledby="keepsake-title">
+        <div class="baby-art" aria-label="Illustration tendre d’un bébé avec un nœud rose">
+          <svg viewBox="0 0 520 650" role="img" aria-hidden="true">
+            <defs><linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6cfc2"/><stop offset="1" stop-color="#e9b6aa"/></linearGradient></defs>
+            <circle cx="90" cy="100" r="3" fill="#c5a46a"/><circle cx="420" cy="145" r="4" fill="#c5a46a"/><path d="M72 190c40-60 70-84 104-96M443 250c-32-58-64-92-103-116" fill="none" stroke="#d8ad88" stroke-width="2" opacity=".55"/>
+            <ellipse cx="260" cy="500" rx="148" ry="132" fill="#fff8f2"/>
+            <circle cx="260" cy="315" r="119" fill="url(#skin)"/>
+            <path d="M148 316c5-85 45-137 112-137 75 0 113 55 117 136-27-70-82-78-115-77-50 1-83 25-114 78z" fill="#8b6a61" opacity=".82"/>
+            <path d="M176 469c25-46 62-65 84-65 26 0 66 20 86 65l40 106H134z" fill="#f1b7c4"/>
+            <path d="M194 346q22 17 44 0M282 346q22 17 44 0" fill="none" stroke="#6e4b4c" stroke-width="6" stroke-linecap="round"/>
+            <path d="M240 383q20 14 40 0" fill="none" stroke="#bd6e78" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="177" cy="266" r="42" fill="#df7893"/><circle cx="343" cy="266" r="42" fill="#df7893"/><path d="M177 266c-45-55-78-5-42 23 14 11 29 5 42-23zm166 0c45-55 78-5 42 23-14 11-29 5-42-23z" fill="#efafbf"/><circle cx="260" cy="260" r="27" fill="#c95f7b"/>
+            <path d="M50 560q90-70 170-10M470 565q-85-70-165-10" fill="none" stroke="#c5a46a" stroke-width="2" opacity=".55"/>
+          </svg>
+        </div>
+        <div class="keepsake-copy">
+          <span class="chapter">Notre souvenir</span>
+          <h2 id="keepsake-title">Gardons ce joli moment…</h2>
+          <p class="arabic-text" style="font-size: 1.1rem; color: var(--rose-deep); margin-bottom: 0.8rem;">لِنَحْفَظْ هَذِهِ اللَّحْظَةَ الْجَمِيلَة...</p>
+          <p>Des petits doigts, un petit sourire et un immense bonheur à venir. Notre plus beau secret est enfin dévoilé.</p>
+          <p class="arabic-text" style="font-size: 1rem; color: var(--muted); margin-top: 0.5rem;">أَصَابِعُ صَغِيرَة، ابْتِسَامَةٌ صَغِيرَة، وَسَعَادَةٌ عَظِيمَةٌ قَادِمَة. سِرُّنَا الْأَجْمَلُ أُخِيرًا مَكْشُوف.</p>
+          <div class="action-row">
+            <button id="capture-button" class="soft-button">📸 Télécharger le souvenir</button>
+            <button id="share-button" class="soft-button">💌 Partager la révélation</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="names" aria-labelledby="names-title">
+        <div class="names-inner">
+          <span class="chapter">À vous de jouer</span>
+          <h2 id="names-title">Quel prénom imaginez-vous&nbsp;?</h2>
+          <p class="arabic-text" style="font-size: 1.2rem; color: #88636b; margin-bottom: 0.5rem;">مَا هُوَ الاِسْمُ الَّذِي تَتَخَيَّلُونَهُ؟</p>
+          <p>Pour notre petite princesse, quel doux prénom vous vient à l’esprit&nbsp;?</p>
+          <form class="name-form" id="name-form">
+            <label class="sr-only" for="name-input">Votre proposition de prénom</label>
+            <input id="name-input" maxlength="24" autocomplete="off" placeholder="Écrivez votre proposition…" required>
+            <button type="submit">Envoyer mon idée</button>
+          </form>
+          <div class="suggestions" id="suggestions" aria-live="polite"></div>
+        </div>
+      </section>
+      <footer class="final-note">
+        <p><span>♥</span> Team Princesse <span>♥</span></p>
+        <p class="arabic-text" style="color: #e6b4bf; font-size: 1.2rem;">فَرِيقُ الْأَمِيرَة</p>
+        <small>Laissez un cœur si vous aviez deviné</small>
+      </footer>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const $ = (q, root = document) => root.querySelector(q);
+    const $$ = (q, root = document) => [...root.querySelectorAll(q)];
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let audioContext, masterGain, soundOn = true, musicTimer;
+
+    function tone(frequency, start, duration, volume = .035, type = 'sine') {
+      if (!audioContext || !soundOn) return;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = type; osc.frequency.value = frequency;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(volume, start + .08);
+      gain.gain.exponentialRampToValueAtTime(.0001, start + duration);
+      osc.connect(gain).connect(masterGain); osc.start(start); osc.stop(start + duration);
+    }
+
+    function startSoundscape() {
+      try {
+        audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+        masterGain ||= (() => { const g = audioContext.createGain(); g.gain.value = .55; g.connect(audioContext.destination); return g; })();
+        audioContext.resume();
+        const playPhrase = () => {
+          const t = audioContext.currentTime;
+          [261.63, 329.63, 392, 523.25].forEach((f, i) => tone(f, t + i * .55, 2.7, .018));
+        };
+        playPhrase(); musicTimer = setInterval(playPhrase, 6700);
+      } catch (_) { soundOn = false; $('#sound-toggle').classList.add('muted'); }
+    }
+
+    function chime(reveal = false) {
+      if (!audioContext || !soundOn) return;
+      const t = audioContext.currentTime;
+      const notes = reveal ? [392, 493.88, 587.33, 783.99, 987.77] : [523.25, 659.25, 783.99];
+      notes.forEach((f, i) => tone(f, t + i * .13, 1.7, reveal ? .045 : .025, 'sine'));
+    }
+
+    function toast(message) {
+      const el = $('#toast'); el.textContent = message; el.classList.add('show');
+      clearTimeout(el._timer); el._timer = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    $('#open-button').addEventListener('click', () => {
+      startSoundscape();
+      $('#opening').classList.add('opened');
+      $('#experience').classList.add('visible');
+      $('#experience').setAttribute('aria-hidden', 'false');
+      setTimeout(() => $('#opening').classList.add('complete'), reduceMotion ? 20 : 2200);
+    });
+
+    $('#sound-toggle').addEventListener('click', e => {
+      soundOn = !soundOn;
+      e.currentTarget.classList.toggle('muted', !soundOn);
+      e.currentTarget.setAttribute('aria-pressed', String(!soundOn));
+      e.currentTarget.setAttribute('aria-label', soundOn ? 'Couper la musique' : 'Activer la musique');
+      if (soundOn) { startSoundscape(); chime(); } else { clearInterval(musicTimer); }
+    });
+
+    const stepObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const delay = Number(entry.target.dataset.step) * 240;
+        setTimeout(() => { entry.target.classList.add('active'); chime(); }, reduceMotion ? 0 : delay);
+      });
+    }, { threshold: .5 });
+    $$('.step').forEach(step => stepObserver.observe(step));
+
+    let counted = false;
+    new IntersectionObserver(entries => {
+      if (!entries[0].isIntersecting || counted) return;
+      counted = true;
+      $$('.numbers span').forEach((el, i) => setTimeout(() => { el.classList.add('on'); tone(330 + i * 80, audioContext?.currentTime || 0, .5, .02); }, reduceMotion ? 0 : i * 650));
+    }, { threshold: .75 }).observe($('.story-timer'));
+
+    $('#reveal-button').addEventListener('click', () => {
+      const reveal = $('#reveal');
+      reveal.classList.add('live');
+      $('#light-wash').classList.remove('flash'); void $('#light-wash').offsetWidth; $('#light-wash').classList.add('flash');
+      setTimeout(() => reveal.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' }), 80);
+      setTimeout(() => { $('.reveal-copy').classList.add('show'); launchConfetti(); chime(true); }, reduceMotion ? 20 : 1400);
+    });
+
+    $('#continue-button').addEventListener('click', () => {
+      $('#after-reveal').classList.add('live');
+      setTimeout(() => $('.keepsake').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth'}), 30);
+    });
+
+    function launchConfetti() {
+      if (reduceMotion) return;
+      const canvas = $('#confetti');
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const resize = () => { canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; ctx.setTransform(dpr,0,0,dpr,0,0); };
+      resize();
+      const colors = ['#d96f8b','#f0afbd','#f7d9df','#c6a56b','#fffaf4'];
+      const pieces = Array.from({length: 180}, (_, i) => ({
+        x: innerWidth * (.2 + Math.random() * .6), y: -20 - Math.random() * innerHeight * .4,
+        vx: (Math.random() - .5) * 7, vy: 2.5 + Math.random() * 5.5,
+        size: 5 + Math.random() * 8, color: colors[i % colors.length], angle: Math.random() * 6.28,
+        spin: (Math.random() - .5) * .25, sway: Math.random() * 2
+      }));
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0,0,innerWidth,innerHeight);
+        pieces.forEach(p => {
+          p.x += p.vx + Math.sin(frame / 18 + p.sway); p.y += p.vy; p.angle += p.spin;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle); ctx.fillStyle=p.color;
+          if (p.sway > 1) { ctx.beginPath(); ctx.arc(0,0,p.size*.55,0,Math.PI*2); ctx.fill(); }
+          else ctx.fillRect(-p.size/2,-p.size/3,p.size,p.size*.65);
+          ctx.restore();
+        });
+        frame++; if (frame < 310) requestAnimationFrame(draw); else ctx.clearRect(0,0,innerWidth,innerHeight);
+      }
+      draw();
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill) {
+      ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fillStyle=fill; ctx.fill();
+    }
+    $('#capture-button').addEventListener('click', () => {
+      const c = document.createElement('canvas'); c.width=1080; c.height=1350; const x=c.getContext('2d');
+      const bg=x.createLinearGradient(0,0,1080,1350); bg.addColorStop(0,'#fffaf4'); bg.addColorStop(.55,'#f7dce3'); bg.addColorStop(1,'#e9b9c5'); x.fillStyle=bg; x.fillRect(0,0,c.width,c.height);
+      x.strokeStyle='rgba(160,107,81,.35)'; x.lineWidth=2; x.strokeRect(50,50,980,1250); x.strokeRect(70,70,940,1210);
+      x.textAlign='center'; x.fillStyle='#b78c53'; x.font='600 24px Avenir, sans-serif'; x.fillText('NOTRE PLUS BEAU SECRET',540,235);
+      x.font='120px serif'; x.fillText('🎀',540,410);
+      x.fillStyle='#9f4d63'; x.font='96px Didot, Georgia, serif'; x.fillText("C’est une",540,590);
+      x.font='italic 126px Didot, Georgia, serif'; x.fillText('petite fille !',540,725);
+      x.fillStyle='#875d67'; x.font='italic 34px Georgia, serif'; x.fillText('Une petite princesse arrive bientôt…',540,855);
+      x.font='46px serif'; x.fillText('✦  ❀  ♡  ❀  ✦',540,985);
+      x.fillStyle='#7c5e65'; x.font='30px Georgia, serif'; x.fillText('Le secret de bébé',540,1125);
+      c.toBlob(blob => {
+        const link=document.createElement('a'); link.download='notre-gender-reveal.png'; link.href=URL.createObjectURL(blob); link.click();
+        setTimeout(()=>URL.revokeObjectURL(link.href),1000); toast('Le souvenir est prêt à être partagé');
+      },'image/png');
+    });
+
+    $('#share-button').addEventListener('click', async () => {
+      const data={title:'Le secret de bébé',text:"Notre plus beau secret est révélé… C’est une petite fille ! 🎀\nسِرُّنَا الْأَجْمَلُ مَكْشُوف... إِنَّهَا بِنْتٌ صَغِيرَة! 🎀"};
+      try {
+        if (navigator.share) await navigator.share(data);
+        else { await navigator.clipboard.writeText(data.text); toast('Le message a été copié'); }
+      } catch (err) { if (err.name !== 'AbortError') toast('Le partage n’est pas disponible sur cet appareil'); }
+    });
+
+    const suggestions = $('#suggestions');
+    const storedNames = JSON.parse(localStorage.getItem('baby-name-ideas') || '[]').slice(0,8);
+    function renderNames() {
+      suggestions.replaceChildren(...storedNames.map(name => {
+        const span=document.createElement('span'); span.className='suggestion'; span.textContent=`♡ ${name}`; return span;
+      }));
+    }
+    renderNames();
+    $('#name-form').addEventListener('submit', e => {
+      e.preventDefault(); const input=$('#name-input'); const name=input.value.trim().replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g,'').slice(0,24);
+      if (!name) return toast('Ajoutez d’abord un joli prénom');
+      if (!storedNames.some(n => n.toLowerCase() === name.toLowerCase())) storedNames.unshift(name);
+      storedNames.splice(8); localStorage.setItem('baby-name-ideas',JSON.stringify(storedNames)); renderNames(); input.value=''; chime(); toast(`L’idée « ${name} » est bien gardée`);
+    });
+  </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
